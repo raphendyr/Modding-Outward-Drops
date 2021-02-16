@@ -1,0 +1,16 @@
+{
+  "author": "raphendyr",
+  "name": "DropTableAlterations",
+  "description": "A library used to create drop table alterations, which may change drop chances of the game. This library can be disabled by setting a configuration variable, thus limiting the integration of mods, but keeping original drop chances.",
+  "tags": [
+    "Library"
+  ],
+  "dependencies": [
+    "sinai-dev SideLoader"
+  ],
+  "conflicts_with": [
+  ],
+  "require_sync": false,
+  "require_version": "0.0",
+  "download_filename": "droptablealterations-mefino.zip"
+}

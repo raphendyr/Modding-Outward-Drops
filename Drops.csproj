@@ -82,11 +82,49 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <None Include="mefino-manifest.json" />
     <None Include="README.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="PostBuildMacros">
+    <GetAssemblyIdentity AssemblyFiles="$(TargetPath)">
+      <Output TaskParameter="Assemblies" ItemName="TargetAssembly" />
+    </GetAssemblyIdentity>
+    <ItemGroup>
+      <VersionNumber Include="@(TargetAssembly->'%(Version)')" />
+    </ItemGroup>
+  </Target>
   <PropertyGroup>
-    <PostBuildEvent>
-    </PostBuildEvent>
+    <PostBuildEventDependsOn>
+      $(PostBuildEventDependsOn);
+      PostBuildMacros;
+    </PostBuildEventDependsOn>
+    <PostBuildEvent>@echo Post-Build started
+set "zip=C:\Program Files\7-Zip\7z.exe"
+set "mefinotarget=$(TargetDir)droptablealterations-mefino.zip"
+set "manualtarget=$(TargetDir)droptablealterations-manual.zip"
+set "manualdist=BepInEx\plugins\raphendyr DropTableAlterations\"
+set "manualsource=BepInEx"
+
+if "$(ConfigurationName)" == "Release" (
+  cd "$(TargetDir)"
+
+  @echo Building mefino distribution
+  if exist "%25mefinotarget%25" del "%25mefinotarget%25"
+  call "%25zip%25" a -tzip -stl -bd -- "%25mefinotarget%25" "$(TargetFileName)"
+
+  @echo
+  @echo Building manual distribution
+  md "%25manualdist%25"
+  xcopy "$(TargetFileName)" "%25manualdist%25" /d /y
+  @echo { &gt; "%25manualdist%25mefino-manifest.json"
+  @echo   "version": "@(VersionNumber)", &gt;&gt; "%25manualdist%25mefino-manifest.json"
+  @more +1 "$(ProjectDir)mefino-manifest.json" &gt;&gt; "%25manualdist%25mefino-manifest.json"
+  if exist "%25manualtarget%25" del "%25manualtarget%25"
+  call "%25zip%25" a -tzip -stl -bd -- "%25manualtarget%25" "%25manualsource%25"
+  rmdir %25manualsource%25 /s /q
+)
+
+@echo Post-Build completed</PostBuildEvent>
   </PropertyGroup>
 </Project>
